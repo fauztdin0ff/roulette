@@ -379,9 +379,31 @@ function getPrizeAtTopByRotation(rotationDeg) {
 ===========================================================================*/
 const playButton = document.querySelector(".game__button");
 let isSpinning = false;
-let totalRotation = 0; // абсолютный накопленный угол (не %360)
+let totalRotation = 0;
+let hasSpun = false; // 👉 Было ли уже основное вращение
+let bgRotation = 0;  // Текущий угол для фонового вращения
+let bgSpinId;        // ID интервала фонового вращения
 
 playButton.addEventListener("click", startSpin);
+
+// =============================
+// 🌈 Фоновое вращение до первого запуска
+// =============================
+function startBackgroundSpin() {
+   const speed = 0.05;
+   function animate() {
+      if (hasSpun) return;
+      bgRotation = (bgRotation + speed) % 360;
+      canvas.style.transform = `rotate(${bgRotation}deg)`;
+      bgSpinId = requestAnimationFrame(animate);
+   }
+   animate();
+}
+startBackgroundSpin(); // запустить сразу после загрузки
+
+function stopBackgroundSpin() {
+   if (bgSpinId) cancelAnimationFrame(bgSpinId);
+}
 
 function getRandomPrize(prizes) {
    const totalChance = prizes.reduce((sum, p) => sum + p.chance, 0);
@@ -400,6 +422,13 @@ function norm360(v) {
 
 function startSpin() {
    if (isSpinning) return;
+
+   if (!hasSpun) {
+      hasSpun = true;
+      stopBackgroundSpin();
+   }
+
+   playButton.classList.add("disabled");
 
    const speedArea = document.querySelector(".game__speed");
    const mode1 = speedArea.querySelector(".game__speed-mode-1");
@@ -425,29 +454,17 @@ function startSpin() {
    // 2. Определяем победителя
    // =============================
    const winner = getRandomPrize(prizes);
-
-   // Средний угол сектора победителя (0° = вправо)
    const prizeMiddleAngle = computePrizeMiddleAngleDeg(winner);
-
-   // Смещение, чтобы сектор оказался на 12 часов (270°)
    let baseRotation = 360 - (prizeMiddleAngle - 270);
    baseRotation = norm360(baseRotation);
 
    // =============================
    // 3. Управление скоростью вращения
    // =============================
-   // Базовая скорость вращения (градусов в секунду)
-   const degreesPerSecond = 360; // 1 оборот в секунду (можно 450–500 для чуть быстрее)
+   const degreesPerSecond = 360;
    const rotationBySpeed = degreesPerSecond * duration;
-
-   // =============================
-   // 4. Итоговый угол
-   // =============================
    const finalRotation = totalRotation + rotationBySpeed + baseRotation;
 
-   // =============================
-   // 5. Адаптивное замедление
-   // =============================
    let easing;
    if (duration >= 30) {
       easing = "cubic-bezier(0.45, 0.95, 0.6, 1)";
@@ -494,6 +511,7 @@ function startSpin() {
 ===========================================================================*/
 function showPrize(prize) {
    console.log("Вы выиграли:", prize.name);
+   playButton.classList.remove("disabled");
 
    const popup = document.querySelector(".win-popup");
    const prizeNameEl = popup.querySelector(".win-popup__prize");
