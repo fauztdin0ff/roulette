@@ -532,6 +532,7 @@ main {
 }
 .game__prize-name {
   color: #eee;
+  font-size: 14px;
   flex: 1;
   z-index: 5;
   width: 100%;
@@ -544,8 +545,8 @@ main {
 .game__prize-chance {
   z-index: 5;
   color: #eee;
-  padding-left: 20px;
-  padding-right: 10px;
+  padding-left: 10px;
+  padding-right: 5px;
   border-left: 1px solid #eee;
 }
 @media (width < 1300px) {
@@ -691,6 +692,7 @@ main {
   display: block;
   transition: filter 0.3s ease;
   z-index: 2;
+  will-change: transform;
 }
 .wheel__arrow {
   position: absolute;
