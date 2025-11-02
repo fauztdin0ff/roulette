@@ -591,12 +591,16 @@ main {
   left: 110%;
   transform: translateY(-50%);
   color: #eee;
+  font-size: 14px;
 }
 .game__speed-mode-2 {
   position: relative;
   display: flex;
   align-items: center;
   gap: 20px;
+}
+.game__speed-mode-2 span {
+  font-size: 14px;
 }
 .game__speed-input {
   background: transparent;
