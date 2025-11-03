@@ -247,8 +247,6 @@ const prizes = [...document.querySelectorAll(".game__prize")].map(el => ({
 }));
 
 let hoveredPrize = null;
-let fade = 1;
-let targetFade = 1;
 
 function resizeCanvas() {
    const size = Math.min(window.innerWidth, window.innerHeight) * 0.8;
@@ -264,7 +262,7 @@ function drawWheel() {
    const radius = canvas.width / 2 - 10;
 
    const totalChance = prizes.reduce((s, p) => s + p.chance, 0);
-   let startAngle = 0; // в радианах, 0 = 3 часа (вправо)
+   let startAngle = 0;
 
    prizes.forEach(prize => {
       const sliceAngle = (prize.chance / totalChance) * 2 * Math.PI;
@@ -273,13 +271,13 @@ function drawWheel() {
       gradient.addColorStop(0, "#37224f");
       gradient.addColorStop(1, prize.color);
 
+      // сектор
       ctx.beginPath();
       ctx.moveTo(centerX, centerY);
       ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
       ctx.closePath();
 
       ctx.fillStyle = gradient;
-      ctx.globalAlpha = hoveredPrize && hoveredPrize !== prize ? fade : 1;
       ctx.fill();
 
       ctx.lineWidth = 2;
@@ -291,22 +289,24 @@ function drawWheel() {
       ctx.translate(centerX, centerY);
       ctx.rotate(startAngle + sliceAngle / 2);
       ctx.textAlign = "right";
-      ctx.fillStyle = "#fff";
       ctx.font = `${canvas.width / 25}px sans-serif`;
+
+      // если наведен этот сектор — меняем цвет текста
+      ctx.fillStyle = hoveredPrize === prize ? "#FFD700" : "#fff";
       ctx.fillText(prize.name, radius - 20, 5);
       ctx.restore();
 
-      ctx.globalAlpha = 1;
       startAngle += sliceAngle;
    });
 
-   // обод и центр
+   // обод
    ctx.beginPath();
    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
    ctx.lineWidth = 15;
    ctx.strokeStyle = "rgba(0,0,0,0.1)";
    ctx.stroke();
 
+   // центр
    ctx.beginPath();
    ctx.arc(centerX, centerY, radius * 0.1, 0, 2 * Math.PI);
    ctx.fillStyle = "#fff";
@@ -314,28 +314,28 @@ function drawWheel() {
 }
 
 function animate() {
-   fade += (targetFade - fade) * 0.1;
    drawWheel();
    requestAnimationFrame(animate);
 }
 
+// hover
 prizes.forEach(prize => {
    prize.element.addEventListener("mouseenter", () => {
       hoveredPrize = prize;
-      targetFade = 0.4;
    });
    prize.element.addEventListener("mouseleave", () => {
       hoveredPrize = null;
-      targetFade = 1;
    });
 });
 
 resizeCanvas();
 animate();
+
 window.addEventListener("resize", () => {
    resizeCanvas();
    drawWheel();
 });
+
 
 /*=========================================================================== 
 Утилиты для вычислений (градусы) 
@@ -523,6 +523,73 @@ function showPrize(prize) {
 
    playConfetti();
    openPopup();
+   resetLever();
+}
+
+
+/*===========================================================================
+🎚 3.1. РЫЧАГ ЗАПУСКА
+===========================================================================*/
+const lever = document.querySelector('.lever');
+const leverCircle = document.querySelector('.lever__circle');
+const leverPipe = document.querySelector('.lever__pipe');
+const leverDesk = document.querySelector('.lever__desk');
+
+let isDragging = false;
+let startY = 0;
+let movedPercent = 0;
+const triggerPercent = 0.1;
+
+leverCircle.addEventListener('mousedown', (e) => {
+   isDragging = true;
+   startY = e.clientY;
+   leverCircle.style.transition = 'none';
+   leverPipe.style.transition = 'none';
+});
+
+document.addEventListener('mousemove', (e) => {
+   if (!isDragging) return;
+
+   const deskHeight = leverDesk.offsetHeight;
+   const deltaY = e.clientY - startY;
+   const maxMove = deskHeight * triggerPercent;
+   const clampedY = Math.max(0, Math.min(deltaY, maxMove * 1.5));
+
+   movedPercent = clampedY / deskHeight;
+   leverCircle.style.transform = `translate(-50%, calc(-200px + ${clampedY}px))`;
+
+   if (movedPercent >= triggerPercent) {
+      releaseLever();
+   }
+});
+
+document.addEventListener('mouseup', () => {
+   if (!isDragging) return;
+   isDragging = false;
+
+   if (movedPercent < triggerPercent) {
+      resetLever();
+   }
+});
+
+function releaseLever() {
+   lever.classList.add('active');
+   isDragging = false;
+   leverCircle.style.transition = 'transform 0.35s ease';
+   leverPipe.style.transition = 'transform 0.35s ease';
+   leverCircle.style.transform = `translate(-50%, 120px)`;
+   leverPipe.style.transform = `scaleY(-1) translate(-50%, 20%)`;
+   setTimeout(() => {
+      startSpin();
+   }, 400);
+}
+
+function resetLever() {
+   lever.classList.remove('active');
+   leverCircle.style.transition = 'transform 0.5s ease';
+   leverPipe.style.transition = 'transform 0.5s ease';
+   leverCircle.style.transform = 'translate(-50%, -200px)';
+   leverPipe.style.transform = 'translate(-50%, -50%) scaleY(1)';
 }
 
 /******/ })()

@@ -532,7 +532,6 @@ main {
 }
 .game__prize-name {
   color: #eee;
-  font-size: 14px;
   flex: 1;
   z-index: 5;
   width: 100%;
@@ -555,7 +554,6 @@ main {
   }
 }
 .game__settings {
-  flex: 0 1 25%;
   height: 100%;
   position: relative;
   z-index: 5;
@@ -681,6 +679,11 @@ main {
   opacity: 0.5;
   pointer-events: none;
 }
+.game__start {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
 
 .wheel {
   position: relative;
@@ -776,8 +779,8 @@ Popup
 .win-popup__body {
   width: 600px;
   margin-inline: auto;
-  transform: scale(0.2);
-  transition: all 1s linear;
+  transform: scale(0.5);
+  transition: all 0.3s linear;
 }
 .win-popup__title {
   font-size: 40px;
@@ -838,6 +841,63 @@ Popup
 .win-popup__button:active {
   transform: scale(0.9);
 }
+.lever {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.lever.active {
+  pointer-events: none;
+}
+.lever__desk {
+  margin-top: 100px;
+  width: 100px;
+  height: 200px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #120026, #390f6a);
+  box-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.1), inset -3px -3px 6px rgba(0, 0, 0, 0.6), 0 10px 20px rgba(0, 0, 0, 0.5);
+  position: relative;
+  transition: all 0.3s ease;
+}
+.lever__desk::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  width: 16px;
+  height: calc(100% - 120px);
+  background: #120026;
+  transform: translateX(-50%);
+  border-radius: 50px;
+}
+.lever__pipe {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 10px;
+  height: 150px;
+  border-radius: 8px 8px 4px 4px;
+  transform: translate(-50%, -50%);
+  transform-origin: bottom;
+  transition: all 0.5s ease;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.1), inset 0 0 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(90deg, #cfd6db 0%, #e9eef2 20%, #c3c9ce 50%, #e3e9ee 70%, #bfc6cb 100%);
+}
+.lever__circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #b87cff, #5a1ca8);
+  transform: translate(-50%, -200px);
+  transition: all 0.5s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 2px 2px 6px rgba(255, 255, 255, 0.3), inset -2px -2px 8px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+}
+
 canvas.confetti-canvas {
   z-index: 99999 !important;
   pointer-events: none;
